@@ -105,8 +105,8 @@ def write_csv_from_repeaters(repeaters: list[Repeater]):
                 r.rx,  # Frequency
                 "",  # Duplex
                 "",  # Offset
-                "",  # Tone
-                "88.5",  # rToneFreq
+                "Tone" if r.tone else "",  # Tone
+                r.tone if r.tone else "88.5",  # rToneFreq
                 "88.5",  # cToneFreq
                 "023",  # DtcsCode
                 "NN",  # DtcsPolarity
