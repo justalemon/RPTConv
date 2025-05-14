@@ -6,15 +6,21 @@ import typer
 from openpyxl.reader.excel import load_workbook
 
 
+def fix_float(num: str):
+    # second one is unicode 8217, not the regular ', aka unicode 39
+    num = num.rstrip("°").rstrip("’").rstrip("\"").replace(",", ".")
+    return float(num)
+
+
 def clean_identifier(identifier: str):
     return identifier.replace(" RPR-", "-").replace("/RPT-", "-").replace(" RPT-", "-").replace(" ", "")
 
 
 def parse_coords(coords: str):
     split = coords.split(" ")
-    degrees = float(split[0].rstrip("°"))
-    minutes = float(split[1].rstrip("’"))  # unicode 8217, not the regular ' aka unicode 39
-    seconds = float(split[2].rstrip("\""))
+    degrees = fix_float(split[0])
+    minutes = fix_float(split[1])
+    seconds = fix_float(split[2])
 
     dd = degrees + (minutes / 60.0) + (seconds / 3600.0)
     return -dd
