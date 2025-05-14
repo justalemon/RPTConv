@@ -1,3 +1,4 @@
+import csv
 import io
 from collections import namedtuple
 from pathlib import Path
@@ -25,6 +26,29 @@ Repeater = namedtuple("Repeater", [
     "longitude",
     "location"
 ])
+HEADER = [
+    "Location",
+    "Name",
+    "Frequency",
+    "Duplex",
+    "Offset",
+    "Tone",
+    "rToneFreq",
+    "cToneFreq",
+    "DtcsCode",
+    "DtcsPolarity",
+    "RxDtcsCode",
+    "CrossMode",
+    "Mode",
+    "TStep",
+    "Skip",
+    "Power",
+    "Comment",
+    "URCALL",
+    "RPT1CALL",
+    "RPT2CALL",
+    "DVCODE"
+]
 
 
 def fix_float(num: str):
@@ -69,6 +93,37 @@ def get_repeaters_from_excel(excel: bytes):
     return entries
 
 
+def write_csv_from_repeaters(repeaters: list[Repeater]):
+    with open("cl_repeaters.csv", "w", newline="\n", encoding="utf-8") as csvfile:
+        writer = csv.writer(csvfile, quoting=csv.QUOTE_NONE)
+        writer.writerow(HEADER)
+
+        for i, r in enumerate(repeaters):
+            writer.writerow([
+                i,  # Location
+                r.identifier,  # Name
+                r.rx,  # Frequency
+                "",  # Duplex
+                "",  # Offset
+                "",  # Tone
+                "88.5",  # rToneFreq
+                "88.5",  # cToneFreq
+                "023",  # DtcsCode
+                "NN",  # DtcsPolarity
+                "023",  # RxDtcsCode
+                "Tone->Tone",  # CrossMode
+                "FM",  # Mode
+                "1",  # TStep
+                "",  # Skip
+                "50W",  # Power
+                r.operator,  # Comment
+                "",  # URCALL
+                "",  # RPT1CALL
+                "",  # RPT2CALL
+                ""  # DVCODE
+            ])
+
+
 def main(file: str = None):
     if file is None:
         request = requests.get("https://www.subtel.gob.cl/wp-content/uploads/2025/03/Informes_RA_26_03_2025_Repetidoras.xlsx")
@@ -78,6 +133,7 @@ def main(file: str = None):
         excel = Path(file).read_bytes()
 
     repeaters = get_repeaters_from_excel(excel)
+    write_csv_from_repeaters(repeaters)
 
 
 if __name__ == "__main__":
