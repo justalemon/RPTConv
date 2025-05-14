@@ -1,9 +1,30 @@
 import io
+from collections import namedtuple
 from pathlib import Path
 
 import requests
 import typer
 from openpyxl.reader.excel import load_workbook
+
+
+Repeater = namedtuple("Repeater", [
+    "operator",
+    "rut",
+    "band",
+    "identifier",
+    "tx",
+    "rx",
+    "tone",
+    "power",
+    "gain",
+    "region",
+    "comuna",
+    "awarded",
+    "expires",
+    "latitude",
+    "longitude",
+    "location"
+])
 
 
 def fix_float(num: str):
@@ -37,23 +58,13 @@ def process_excel(contents: bytes):
         if i == 0:
             continue
 
-        operator = row[0].value
-        rut = row[1].value
-        band = row[2].value
-        identifier = clean_identifier(row[3].value)
-        tx = row[4].value
-        rx = row[5].value
-        tone = row[6].value
-        power = row[7].value
-        gain = row[8].value
-        region = row[9].value
-        comuna = row[10].value
-        awarded = row[11].value
-        expired = row[12].value
-        latitude = parse_coords(row[13].value)
-        longitude = parse_coords(row[14].value)
-        location = row[15].value
-        entries.append((operator, rut, band, identifier, tx, rx, tone, power, gain, region, comuna, awarded, expired, latitude, longitude, location))
+        args = [x.value for x in row]
+        args[3] = clean_identifier(args[3])
+        args[13] = parse_coords(args[13])
+        args[14] = parse_coords(args[14])
+
+        repeater = Repeater(*args)
+        entries.append(repeater)
 
     return entries
 
