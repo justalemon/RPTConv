@@ -116,7 +116,7 @@ def write_csv_from_repeaters(repeaters: list[Repeater]):
                 "1",  # TStep
                 "",  # Skip
                 "50W",  # Power
-                r.operator,  # Comment
+                r.operator + " @ " + r.location.replace(",", ""),  # Comment
                 "",  # URCALL
                 "",  # RPT1CALL
                 "",  # RPT2CALL
