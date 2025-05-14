@@ -124,13 +124,16 @@ def write_csv_from_repeaters(repeaters: list[Repeater]):
             ])
 
 
-def main(file: str = None):
-    if file is None:
-        request = requests.get("https://www.subtel.gob.cl/wp-content/uploads/2025/03/Informes_RA_26_03_2025_Repetidoras.xlsx")
+def main(input_file: str = None, fetch_url: str = None):
+    if fetch_url is None and input_file is None:
+        fetch_url = "https://www.subtel.gob.cl/wp-content/uploads/2025/03/Informes_RA_26_03_2025_Repetidoras.xlsx"
+
+    if input_file is None:
+        request = requests.get(fetch_url)
         request.raise_for_status()
         excel = request.content
     else:
-        excel = Path(file).read_bytes()
+        excel = Path(input_file).read_bytes()
 
     repeaters = get_repeaters_from_excel(excel)
     write_csv_from_repeaters(repeaters)
