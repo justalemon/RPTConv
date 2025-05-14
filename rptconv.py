@@ -6,6 +6,16 @@ import typer
 from openpyxl.reader.excel import load_workbook
 
 
+def parse_coords(coords: str):
+    split = coords.split(" ")
+    degrees = float(split[0].rstrip("°"))
+    minutes = float(split[1].rstrip("’"))  # unicode 8217, not the regular ' aka unicode 39
+    seconds = float(split[2].rstrip("\""))
+
+    dd = degrees + (minutes / 60.0) + (seconds / 3600.0)
+    return -dd
+
+
 def process_excel(contents: bytes):
     bytes_io = io.BytesIO(contents)
     wb = load_workbook(bytes_io, read_only=True)
@@ -30,8 +40,8 @@ def process_excel(contents: bytes):
         comuna = row[10].value
         awarded = row[11].value
         expired = row[12].value
-        latitude = row[13].value
-        longitude = row[14].value
+        latitude = parse_coords(row[13].value)
+        longitude = parse_coords(row[14].value)
         location = row[15].value
         entries.append((operator, rut, band, identifier, tx, rx, tone, power, gain, region, comuna, awarded, expired, latitude, longitude, location))
 
