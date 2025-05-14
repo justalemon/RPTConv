@@ -47,8 +47,8 @@ def parse_coords(coords: str):
     return -dd
 
 
-def process_excel(contents: bytes):
-    bytes_io = io.BytesIO(contents)
+def get_repeaters_from_excel(excel: bytes):
+    bytes_io = io.BytesIO(excel)
     wb = load_workbook(bytes_io, read_only=True)
     ws = wb.active
 
@@ -73,11 +73,11 @@ def main(file: str = None):
     if file is None:
         request = requests.get("https://www.subtel.gob.cl/wp-content/uploads/2025/03/Informes_RA_26_03_2025_Repetidoras.xlsx")
         request.raise_for_status()
-        content = request.content
+        excel = request.content
     else:
-        content = Path(file).read_bytes()
+        excel = Path(file).read_bytes()
 
-    process_excel(content)
+    repeaters = get_repeaters_from_excel(excel)
 
 
 if __name__ == "__main__":
