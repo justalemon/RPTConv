@@ -6,6 +6,10 @@ import typer
 from openpyxl.reader.excel import load_workbook
 
 
+def clean_identifier(identifier: str):
+    return identifier.replace(" RPR-", "-").replace("/RPT-", "-").replace(" RPT-", "-").replace(" ", "")
+
+
 def parse_coords(coords: str):
     split = coords.split(" ")
     degrees = float(split[0].rstrip("°"))
@@ -30,7 +34,7 @@ def process_excel(contents: bytes):
         operator = row[0].value
         rut = row[1].value
         band = row[2].value
-        identifier = row[3].value
+        identifier = clean_identifier(row[3].value)
         tx = row[4].value
         rx = row[5].value
         tone = row[6].value
