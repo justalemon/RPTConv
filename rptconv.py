@@ -76,6 +76,13 @@ NARROW = [
 ]
 
 
+def check_regions(l: list[str]):
+    for region in l:
+        if region not in REGIONS.values():
+            raise typer.BadParameter("Expected any of " + ", ".join(REGIONS.values()))
+    return l
+
+
 def fix_float(num: str):
     # second one is unicode 8217, not the regular ', aka unicode 39
     num = num.rstrip("°").rstrip("’").rstrip("\"").replace(",", ".")
@@ -127,7 +134,7 @@ def get_repeaters_from_excel(excel: bytes):
     return entries
 
 
-def write_csv_from_repeaters(repeaters: list[Repeater]):
+def write_csv_from_repeaters(repeaters: list[Repeater], regions: list[str] | None):
     print(f"{Fore.RED}Writing {Fore.WHITE}{len(repeaters)} {Fore.RED}repeaters to {Fore.WHITE}cl_repeaters.csv{Style.RESET_ALL}")
 
     with open("cl_repeaters.csv", "w", newline="\n", encoding="utf-8") as csvfile:
@@ -135,6 +142,10 @@ def write_csv_from_repeaters(repeaters: list[Repeater]):
         writer.writerow(HEADER)
 
         for i, r in enumerate(repeaters):
+            if regions is not None and r.region not in regions:
+                print(f"{Fore.RED}Skipping {Fore.WHITE}{r.identifier} {Fore.RED} because its not in the specified regions {Style.RESET_ALL}")
+                continue
+
             offset = round(r.rx - r.tx, 1)
             mode = "NFM" if r.identifier in NARROW else "FM"
 
@@ -166,7 +177,8 @@ def write_csv_from_repeaters(repeaters: list[Repeater]):
 
 
 def main(input_file: Annotated[str, typer.Option(help="Local XLSX file to parse.")] = None,
-         fetch_url: Annotated[str, typer.Option(help="URL of XLSX to request and parse.")] = None):
+         fetch_url: Annotated[str, typer.Option(help="URL of XLSX to request and parse.")] = None,
+         regions: Annotated[list[str], typer.Option(help="The regions to fetch.", callback=check_regions)] = None):
     if fetch_url is None and input_file is None:
         fetch_url = "https://www.subtel.gob.cl/wp-content/uploads/2025/05/Informes_RA_13_05_2025_repetidoras.xlsx"
 
@@ -182,7 +194,7 @@ def main(input_file: Annotated[str, typer.Option(help="Local XLSX file to parse.
         excel = path.read_bytes()
 
     repeaters = get_repeaters_from_excel(excel)
-    write_csv_from_repeaters(repeaters)
+    write_csv_from_repeaters(repeaters, regions)
 
     print(f"{Fore.MAGENTA}Success!{Style.RESET_ALL}")
 
