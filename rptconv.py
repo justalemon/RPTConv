@@ -2,6 +2,7 @@ import csv
 import io
 from collections import namedtuple
 from pathlib import Path
+from typing import Annotated
 
 import requests
 import typer
@@ -126,7 +127,8 @@ def write_csv_from_repeaters(repeaters: list[Repeater]):
             ])
 
 
-def main(input_file: str = None, fetch_url: str = None):
+def main(input_file: Annotated[str, typer.Option(help="Local XLSX file to parse.")] = None,
+         fetch_url: Annotated[str, typer.Option(help="URL of XLSX to request and parse.")] = None):
     if fetch_url is None and input_file is None:
         fetch_url = "https://www.subtel.gob.cl/wp-content/uploads/2025/05/Informes_RA_13_05_2025_repetidoras.xlsx"
 
