@@ -69,6 +69,11 @@ REGIONS = {
     "REGIÓN DE TARAPACÁ": "TA",
     "REGIÓN DE VALPARAÍSO": "VA",
 }
+BANDS = {
+    "2m": [144, 148],
+    "1.25m": [220, 225],
+    "70cm": [420, 450]
+}
 NARROW = [
     "CE3PA-A",
     "CE3PA-B",
@@ -81,6 +86,13 @@ def check_regions(l: list[str]):
         if region not in REGIONS.values():
             raise typer.BadParameter("Expected any of " + ", ".join(REGIONS.values()))
     return l
+
+
+def check_bands(b: list[str]):
+    for band in b:
+        if band not in BANDS.keys():
+            raise typer.BadParameter("Expected any of " + ", ".join(BANDS.keys()))
+    return b
 
 
 def fix_float(num: str):
@@ -101,6 +113,14 @@ def parse_coords(coords: str):
 
     dd = degrees + (minutes / 60.0) + (seconds / 3600.0)
     return -dd
+
+
+def get_band_for_frequency(freq: float):
+    for band_name, band_range in BANDS.items():
+        if band_range[0] <= freq <= band_range[1]:
+            return band_name
+
+    return None
 
 
 def get_repeaters_from_excel(excel: bytes):
@@ -134,7 +154,7 @@ def get_repeaters_from_excel(excel: bytes):
     return entries
 
 
-def write_csv_from_repeaters(repeaters: list[Repeater], regions: list[str] | None):
+def write_csv_from_repeaters(repeaters: list[Repeater], regions: list[str] | None, bands: list[str] | None):
     print(f"{Fore.RED}Writing {Fore.WHITE}{len(repeaters)} {Fore.RED}repeaters to {Fore.WHITE}cl_repeaters.csv{Style.RESET_ALL}")
 
     with open("cl_repeaters.csv", "w", newline="\n", encoding="utf-8") as csvfile:
@@ -146,6 +166,12 @@ def write_csv_from_repeaters(repeaters: list[Repeater], regions: list[str] | Non
         for r in repeaters:
             if regions is not None and r.region not in regions:
                 print(f"{Fore.RED}Skipping {Fore.WHITE}{r.identifier}{Fore.RED} because its not in the specified regions {Style.RESET_ALL}")
+                continue
+
+            band = get_band_for_frequency(r.rx)
+
+            if bands is not None and band not in bands:
+                print(f"{Fore.RED}Skipping {Fore.WHITE}{r.identifier}{Fore.RED} because its outside of our specified bands {Style.RESET_ALL}")
                 continue
 
             offset = round(r.rx - r.tx, 1)
@@ -182,7 +208,8 @@ def write_csv_from_repeaters(repeaters: list[Repeater], regions: list[str] | Non
 
 def main(input_file: Annotated[str, typer.Option(help="Local XLSX file to parse.")] = None,
          fetch_url: Annotated[str, typer.Option(help="URL of XLSX to request and parse.")] = None,
-         regions: Annotated[list[str], typer.Option(help="The regions to fetch.", callback=check_regions)] = None):
+         regions: Annotated[list[str], typer.Option(help="The regions to fetch.", callback=check_regions)] = None,
+         bands: Annotated[list[str], typer.Option(help="The bands to fetch.", callback=check_bands)] = None):
     if fetch_url is None and input_file is None:
         fetch_url = "https://www.subtel.gob.cl/wp-content/uploads/2025/05/Informes_RA_13_05_2025_repetidoras.xlsx"
 
@@ -198,7 +225,7 @@ def main(input_file: Annotated[str, typer.Option(help="Local XLSX file to parse.
         excel = path.read_bytes()
 
     repeaters = get_repeaters_from_excel(excel)
-    write_csv_from_repeaters(repeaters, regions)
+    write_csv_from_repeaters(repeaters, regions, bands)
 
     print(f"{Fore.MAGENTA}Success!{Style.RESET_ALL}")
 
