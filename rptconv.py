@@ -128,7 +128,7 @@ def write_csv_from_repeaters(repeaters: list[Repeater]):
 
 def main(input_file: str = None, fetch_url: str = None):
     if fetch_url is None and input_file is None:
-        fetch_url = "https://www.subtel.gob.cl/wp-content/uploads/2025/03/Informes_RA_26_03_2025_Repetidoras.xlsx"
+        fetch_url = "https://www.subtel.gob.cl/wp-content/uploads/2025/05/Informes_RA_13_05_2025_repetidoras.xlsx"
 
     if input_file is None:
         request = requests.get(fetch_url)
