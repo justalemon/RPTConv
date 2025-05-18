@@ -143,7 +143,7 @@ def write_csv_from_repeaters(repeaters: list[Repeater], regions: list[str] | Non
 
         for i, r in enumerate(repeaters):
             if regions is not None and r.region not in regions:
-                print(f"{Fore.RED}Skipping {Fore.WHITE}{r.identifier} {Fore.RED} because its not in the specified regions {Style.RESET_ALL}")
+                print(f"{Fore.RED}Skipping {Fore.WHITE}{r.identifier}{Fore.RED} because its not in the specified regions {Style.RESET_ALL}")
                 continue
 
             offset = round(r.rx - r.tx, 1)
