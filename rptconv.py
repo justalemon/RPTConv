@@ -99,12 +99,14 @@ def write_csv_from_repeaters(repeaters: list[Repeater]):
         writer.writerow(HEADER)
 
         for i, r in enumerate(repeaters):
+            offset = round(r.rx - r.tx, 1)
+
             writer.writerow([
                 i,  # Location
                 r.identifier,  # Name
                 r.rx,  # Frequency
-                "",  # Duplex
-                "",  # Offset
+                "-" if offset < 0 else "+",  # Duplex
+                abs(offset),  # Offset
                 "Tone" if r.tone else "",  # Tone
                 r.tone if r.tone else "88.5",  # rToneFreq
                 "88.5",  # cToneFreq
