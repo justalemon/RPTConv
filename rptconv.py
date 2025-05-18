@@ -141,7 +141,9 @@ def write_csv_from_repeaters(repeaters: list[Repeater], regions: list[str] | Non
         writer = csv.writer(csvfile, quoting=csv.QUOTE_NONE)
         writer.writerow(HEADER)
 
-        for i, r in enumerate(repeaters):
+        last_index = 0
+
+        for r in repeaters:
             if regions is not None and r.region not in regions:
                 print(f"{Fore.RED}Skipping {Fore.WHITE}{r.identifier}{Fore.RED} because its not in the specified regions {Style.RESET_ALL}")
                 continue
@@ -152,7 +154,7 @@ def write_csv_from_repeaters(repeaters: list[Repeater], regions: list[str] | Non
             print(f"{Fore.RED}Writing {Fore.WHITE}{r.identifier} ({mode}) {Fore.RED}...{Style.RESET_ALL}")
 
             writer.writerow([
-                i,  # Location
+                last_index,  # Location
                 r.identifier,  # Name
                 r.rx,  # Frequency
                 "-" if offset < 0 else "+",  # Duplex
@@ -174,6 +176,8 @@ def write_csv_from_repeaters(repeaters: list[Repeater], regions: list[str] | Non
                 "",  # RPT2CALL
                 ""  # DVCODE
             ])
+
+            last_index += 1
 
 
 def main(input_file: Annotated[str, typer.Option(help="Local XLSX file to parse.")] = None,
