@@ -6,6 +6,7 @@ from typing import Annotated
 
 import requests
 import typer
+from colorama import Fore, Style
 from openpyxl.reader.excel import load_workbook
 
 
@@ -73,6 +74,8 @@ def parse_coords(coords: str):
 
 
 def get_repeaters_from_excel(excel: bytes):
+    print(f"{Fore.CYAN}Starting repeater processing{Style.RESET_ALL}")
+
     bytes_io = io.BytesIO(excel)
     wb = load_workbook(bytes_io, read_only=True)
     ws = wb.active
@@ -91,16 +94,22 @@ def get_repeaters_from_excel(excel: bytes):
         repeater = Repeater(*args)
         entries.append(repeater)
 
+    print(f"{Fore.CYAN}Found {Fore.WHITE}{len(entries)} {Fore.CYAN}repeaters!{Style.RESET_ALL}")
+
     return entries
 
 
 def write_csv_from_repeaters(repeaters: list[Repeater]):
+    print(f"{Fore.RED}Writing {Fore.WHITE}{len(repeaters)} {Fore.RED}repeaters to {Fore.WHITE}cl_repeaters.csv{Style.RESET_ALL}")
+
     with open("cl_repeaters.csv", "w", newline="\n", encoding="utf-8") as csvfile:
         writer = csv.writer(csvfile, quoting=csv.QUOTE_NONE)
         writer.writerow(HEADER)
 
         for i, r in enumerate(repeaters):
             offset = round(r.rx - r.tx, 1)
+
+            print(f"{Fore.RED}Writing {Fore.WHITE}{r.identifier}{Fore.RED}...{Style.RESET_ALL}")
 
             writer.writerow([
                 i,  # Location
@@ -133,14 +142,20 @@ def main(input_file: Annotated[str, typer.Option(help="Local XLSX file to parse.
         fetch_url = "https://www.subtel.gob.cl/wp-content/uploads/2025/05/Informes_RA_13_05_2025_repetidoras.xlsx"
 
     if input_file is None:
+        print(f"{Fore.GREEN}Will fetch the XLSX from {Fore.WHITE}{fetch_url}{Style.RESET_ALL}")
         request = requests.get(fetch_url)
         request.raise_for_status()
+        print(f"{Fore.GREEN}Successfully fetched XLSX from URL{Style.RESET_ALL}")
         excel = request.content
     else:
-        excel = Path(input_file).read_bytes()
+        path = Path(input_file)
+        print(f"{Fore.GREEN}Will use the following XLSX file{Fore.WHITE}: {path}{Style.RESET_ALL}")
+        excel = path.read_bytes()
 
     repeaters = get_repeaters_from_excel(excel)
     write_csv_from_repeaters(repeaters)
+
+    print(f"{Fore.MAGENTA}Success!{Style.RESET_ALL}")
 
 
 if __name__ == "__main__":
