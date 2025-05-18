@@ -51,6 +51,11 @@ HEADER = [
     "RPT2CALL",
     "DVCODE"
 ]
+NARROW = [
+    "CE3PA-A",
+    "CE3PA-B",
+    "CE3PA-D"
+]
 
 
 def fix_float(num: str):
@@ -108,8 +113,9 @@ def write_csv_from_repeaters(repeaters: list[Repeater]):
 
         for i, r in enumerate(repeaters):
             offset = round(r.rx - r.tx, 1)
+            mode = "NFM" if r.identifier in NARROW else "FM"
 
-            print(f"{Fore.RED}Writing {Fore.WHITE}{r.identifier}{Fore.RED}...{Style.RESET_ALL}")
+            print(f"{Fore.RED}Writing {Fore.WHITE}{r.identifier} ({mode}) {Fore.RED}...{Style.RESET_ALL}")
 
             writer.writerow([
                 i,  # Location
@@ -124,7 +130,7 @@ def write_csv_from_repeaters(repeaters: list[Repeater]):
                 "NN",  # DtcsPolarity
                 "023",  # RxDtcsCode
                 "Tone->Tone",  # CrossMode
-                "FM",  # Mode
+                mode,  # Mode
                 "1",  # TStep
                 "",  # Skip
                 "50W",  # Power
