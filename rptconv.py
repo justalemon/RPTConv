@@ -51,6 +51,24 @@ HEADER = [
     "RPT2CALL",
     "DVCODE"
 ]
+REGIONS = {
+    "rEGIÓN DE AYSÉN DEL GENERAL CARLOS IBÁÑEZ DEL CAMPO": "AI",  # none
+    "REGIÓN DE ANTOFAGASTA": "AN",
+    "REGIÓN DE ARICA Y PARINACOTA": "AP",  # none?
+    "REGIÓN DE LA ARAUCANÍA": "AR",
+    "REGIÓN DE ATACAMA": "AT",
+    "REGIÓN DEL BIOBÍO": "BI",
+    "REGIÓN DE COQUIMBO": "CO",
+    "REGIÓN DEL LIBERTADOR GENERAL BERNARDO O'HIGGINS": "OH",
+    "REGIÓN DE LOS LAGOS": "LL",
+    "REGIÓN DE LOS RÍOS": "LR",
+    "REGIÓN DE MAGALLANES Y DE LA ANTÁRTICA CHILENA": "MG",  # none
+    "REGIÓN DEL MAULE": "MA",
+    "REGIÓN DE NUBLE": "NB",
+    "REGIÓN METROPOLITANA DE SANTIAGO": "RM",
+    "REGIÓN DE TARAPACÁ": "TA",
+    "REGIÓN DE VALPARAÍSO": "VA",
+}
 NARROW = [
     "CE3PA-A",
     "CE3PA-B",
@@ -93,10 +111,15 @@ def get_repeaters_from_excel(excel: bytes):
 
         args = [x.value for x in row]
         args[3] = clean_identifier(args[3])
+        args[9] = REGIONS[args[9]] if args[9] is not None else "AA"
         args[13] = parse_coords(args[13])
         args[14] = parse_coords(args[14])
 
         repeater = Repeater(*args)
+
+        if repeater.region == "AA":
+            print(f"{Fore.RED}Warning! {Fore.CYAN}Repeater {repeater.identifier} does not has a valid region!{Style.RESET_ALL} ")
+
         entries.append(repeater)
 
     print(f"{Fore.CYAN}Found {Fore.WHITE}{len(entries)} {Fore.CYAN}repeaters!{Style.RESET_ALL}")
