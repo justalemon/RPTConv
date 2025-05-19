@@ -84,7 +84,7 @@ NARROW = [
 
 def check_regions(l: list[str]):
     if l is None:
-        return l
+        return []
     for region in l:
         if region not in REGIONS.values():
             raise typer.BadParameter("Expected any of " + ", ".join(REGIONS.values()))
@@ -93,7 +93,7 @@ def check_regions(l: list[str]):
 
 def check_bands(b: list[str]):
     if b is None:
-        return b
+        return []
     for band in b:
         if band not in BANDS.keys():
             raise typer.BadParameter("Expected any of " + ", ".join(BANDS.keys()))
@@ -215,6 +215,14 @@ def main(input_file: Annotated[str, typer.Option(help="Local XLSX file to parse.
          fetch_url: Annotated[str, typer.Option(help="URL of XLSX to request and parse.")] = None,
          regions: Annotated[list[str], typer.Option(help="The regions to fetch.", callback=check_regions)] = None,
          bands: Annotated[list[str], typer.Option(help="The bands to fetch.", callback=check_bands)] = None):
+    # This is a bodge for a bug in Typer that causes
+    # TypeError: object of type 'NoneType' has no len()
+    # /usr/lib/python3.13/site-packages/typer/main.py:644 in internal_convertor
+    if len(regions) == 0:
+        regions = None
+    if len(bands) == 0:
+        bands = None
+
     if fetch_url is None and input_file is None:
         fetch_url = "https://www.subtel.gob.cl/wp-content/uploads/2025/05/Informes_RA_13_05_2025_repetidoras.xlsx"
 
