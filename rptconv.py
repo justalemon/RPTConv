@@ -2,6 +2,7 @@
 import csv
 import io
 from collections import namedtuple
+from math import pi, cos, asin, sqrt
 from pathlib import Path
 from typing import Annotated
 
@@ -82,6 +83,15 @@ NARROW = [
 ]
 
 
+def distance(lat1, lon1, lat2, lon2):
+    # https://stackoverflow.com/a/21623206/7620258
+    r = 6371 # km
+    p = pi / 180
+
+    a = 0.5 - cos((lat2 - lat1) * p) / 2 + cos(lat1 * p) * cos(lat2 * p) * (1 - cos((lon2 - lon1) * p)) / 2
+    return 2 * r * asin(sqrt(a))
+
+
 def check_regions(l: list[str]):
     if l is None:
         return []
@@ -128,8 +138,13 @@ def get_band_for_frequency(freq: float):
     return None
 
 
-def get_repeaters_from_excel(excel: bytes):
+def get_repeaters_from_excel(excel: bytes, lat: float = None, lon: float = None) -> list[Repeater]:
     print(f"{Fore.CYAN}Starting repeater processing{Style.RESET_ALL}")
+
+    should_sort = lat is not None or lon is not None
+
+    if should_sort:
+        print(f"{Fore.CYAN}Will use latitude and longitude to sort based on distance{Style.RESET_ALL}")
 
     bytes_io = io.BytesIO(excel)
     wb = load_workbook(bytes_io, read_only=True)
@@ -155,6 +170,9 @@ def get_repeaters_from_excel(excel: bytes):
         entries.append(repeater)
 
     print(f"{Fore.CYAN}Found {Fore.WHITE}{len(entries)} {Fore.CYAN}repeaters!{Style.RESET_ALL}")
+
+    if should_sort:
+        entries.sort(key=lambda r: distance(lat, lon, r.latitude, r.longitude))
 
     return entries
 
@@ -217,7 +235,9 @@ def main(input_file: Annotated[str, typer.Option(help="Local XLSX file to parse.
          fetch_url: Annotated[str, typer.Option(help="URL of XLSX to request and parse.")] = None,
          regions: Annotated[list[str], typer.Option(help="The regions to fetch.", callback=check_regions)] = None,
          bands: Annotated[list[str], typer.Option(help="The bands to fetch.", callback=check_bands)] = None,
-         log_skips: Annotated[bool, typer.Option(help="Whether to log the skipped repeaters or not.")] = False):
+         log_skips: Annotated[bool, typer.Option(help="Whether to log the skipped repeaters or not.")] = False,
+         lat: Annotated[float | None, typer.Option(help="The latitude to sort by distance.")] = None,
+         lon: Annotated[float | None, typer.Option(help="The longitude to sort by distance.")] = None):
     # This is a bodge for a bug in Typer that causes
     # TypeError: object of type 'NoneType' has no len()
     # /usr/lib/python3.13/site-packages/typer/main.py:644 in internal_convertor
@@ -240,7 +260,7 @@ def main(input_file: Annotated[str, typer.Option(help="Local XLSX file to parse.
         print(f"{Fore.GREEN}Will use the following XLSX file{Fore.WHITE}: {path}{Style.RESET_ALL}")
         excel = path.read_bytes()
 
-    repeaters = get_repeaters_from_excel(excel)
+    repeaters = get_repeaters_from_excel(excel, lat, lon)
     write_csv_from_repeaters(repeaters, regions, bands, log_skips)
 
     print(f"{Fore.MAGENTA}Success!{Style.RESET_ALL}")
