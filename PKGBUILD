@@ -1,9 +1,6 @@
 # Maintainer: Hannele Ruiz <justlemoncl@gmail.com>
 pkgname=rptconv
 pkgver=r33.4bbfe31
-if [[ -n $"MAKEDEB_VERSION" ]]; then
-    pkgver="${pkgver:1}"
-fi
 pkgrel=1
 pkgdesc="Script to convert repeaters from the Chilean list of repeaters provided by SUBTEL into CHIRP compatible lists"
 url="https://github.com/justalemon/RPTConv"
@@ -22,7 +19,13 @@ sha256sums=('SKIP')
 
 pkgver() {
     cd "src-$pkgname"
-    printf "r%s.%s" "$(git rev-list --count HEAD)" "$(git rev-parse --short=7 HEAD)"
+    local format
+    if [[ -n $"MAKEDEB_VERSION" ]]; then
+        format="%s.%s"
+    else
+        format="r%s.%s"
+    fi
+    printf "$format" "$(git rev-list --count HEAD)" "$(git rev-parse --short=7 HEAD)"
 }
 
 package() {
