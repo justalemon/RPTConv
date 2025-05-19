@@ -1,3 +1,4 @@
+# Maintainer: Hannele Ruiz <justlemoncl@gmail.com>
 pkgname=rptconv
 pkgver=r33.4bbfe31
 if [[ -n $"MAKEDEB_VERSION" ]]; then
