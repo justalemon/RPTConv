@@ -159,7 +159,7 @@ def get_repeaters_from_excel(excel: bytes):
     return entries
 
 
-def write_csv_from_repeaters(repeaters: list[Repeater], regions: list[str] | None, bands: list[str] | None):
+def write_csv_from_repeaters(repeaters: list[Repeater], regions: list[str] | None, bands: list[str] | None, log_skips: bool = False):
     print(f"{Fore.RED}Writing {Fore.WHITE}{len(repeaters)} {Fore.RED}repeaters to {Fore.WHITE}cl_repeaters.csv{Style.RESET_ALL}")
 
     with open("cl_repeaters.csv", "w", newline="\n", encoding="utf-8") as csvfile:
@@ -170,13 +170,15 @@ def write_csv_from_repeaters(repeaters: list[Repeater], regions: list[str] | Non
 
         for r in repeaters:
             if regions is not None and r.region not in regions:
-                print(f"{Fore.RED}Skipping {Fore.WHITE}{r.identifier}{Fore.RED} because its not in the specified regions {Style.RESET_ALL}")
+                if log_skips:
+                    print(f"{Fore.RED}Skipping {Fore.WHITE}{r.identifier}{Fore.RED} because its not in the specified regions {Style.RESET_ALL}")
                 continue
 
             band = get_band_for_frequency(r.rx)
 
             if bands is not None and band not in bands:
-                print(f"{Fore.RED}Skipping {Fore.WHITE}{r.identifier}{Fore.RED} because its outside of our specified bands {Style.RESET_ALL}")
+                if log_skips:
+                    print(f"{Fore.RED}Skipping {Fore.WHITE}{r.identifier}{Fore.RED} because its outside of our specified bands {Style.RESET_ALL}")
                 continue
 
             offset = round(r.rx - r.tx, 1)
@@ -214,7 +216,8 @@ def write_csv_from_repeaters(repeaters: list[Repeater], regions: list[str] | Non
 def main(input_file: Annotated[str, typer.Option(help="Local XLSX file to parse.")] = None,
          fetch_url: Annotated[str, typer.Option(help="URL of XLSX to request and parse.")] = None,
          regions: Annotated[list[str], typer.Option(help="The regions to fetch.", callback=check_regions)] = None,
-         bands: Annotated[list[str], typer.Option(help="The bands to fetch.", callback=check_bands)] = None):
+         bands: Annotated[list[str], typer.Option(help="The bands to fetch.", callback=check_bands)] = None,
+         log_skips: Annotated[bool, typer.Option(help="Whether to log the skipped repeaters or not.")] = False):
     # This is a bodge for a bug in Typer that causes
     # TypeError: object of type 'NoneType' has no len()
     # /usr/lib/python3.13/site-packages/typer/main.py:644 in internal_convertor
