@@ -218,9 +218,9 @@ def main(input_file: Annotated[str, typer.Option(help="Local XLSX file to parse.
     # This is a bodge for a bug in Typer that causes
     # TypeError: object of type 'NoneType' has no len()
     # /usr/lib/python3.13/site-packages/typer/main.py:644 in internal_convertor
-    if len(regions) == 0:
+    if regions is not None and len(regions) == 0:
         regions = None
-    if len(bands) == 0:
+    if bands is not None and len(bands) == 0:
         bands = None
 
     if fetch_url is None and input_file is None:
