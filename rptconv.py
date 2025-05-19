@@ -159,7 +159,7 @@ def get_repeaters_from_excel(excel: bytes):
     return entries
 
 
-def write_csv_from_repeaters(repeaters: list[Repeater], regions: list[str] | None, bands: list[str] | None, log_skips: bool = False):
+def write_csv_from_repeaters(repeaters: list[Repeater], regions: list[str] | None, bands: list[str] | None, log_skips: bool):
     print(f"{Fore.RED}Writing {Fore.WHITE}{len(repeaters)} {Fore.RED}repeaters to {Fore.WHITE}cl_repeaters.csv{Style.RESET_ALL}")
 
     with open("cl_repeaters.csv", "w", newline="\n", encoding="utf-8") as csvfile:
@@ -241,7 +241,7 @@ def main(input_file: Annotated[str, typer.Option(help="Local XLSX file to parse.
         excel = path.read_bytes()
 
     repeaters = get_repeaters_from_excel(excel)
-    write_csv_from_repeaters(repeaters, regions, bands)
+    write_csv_from_repeaters(repeaters, regions, bands, log_skips)
 
     print(f"{Fore.MAGENTA}Success!{Style.RESET_ALL}")
 
