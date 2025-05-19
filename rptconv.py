@@ -83,6 +83,8 @@ NARROW = [
 
 
 def check_regions(l: list[str]):
+    if l is None:
+        return l
     for region in l:
         if region not in REGIONS.values():
             raise typer.BadParameter("Expected any of " + ", ".join(REGIONS.values()))
@@ -90,6 +92,8 @@ def check_regions(l: list[str]):
 
 
 def check_bands(b: list[str]):
+    if b is None:
+        return b
     for band in b:
         if band not in BANDS.keys():
             raise typer.BadParameter("Expected any of " + ", ".join(BANDS.keys()))
