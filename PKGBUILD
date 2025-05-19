@@ -7,7 +7,7 @@ url="https://github.com/justalemon/RPTConv"
 arch=("any")
 license=("MIT")
 depends=()
-if [[ -n $"MAKEDEB_VERSION" ]]; then
+if [[ -v MAKEDEB_VERSION ]]; then
     depends+=(python3 python3-typer python3-requests python3-openpyxl python3-colorama)
 else
     depends+=(python python-typer python-requests python-openpyxl python-colorama)
@@ -20,7 +20,7 @@ sha256sums=('SKIP')
 pkgver() {
     cd "src-$pkgname"
     local format
-    if [[ -n $"MAKEDEB_VERSION" ]]; then
+    if [[ -v MAKEDEB_VERSION ]]; then
         format="%s.%s"
     else
         format="r%s.%s"
