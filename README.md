@@ -1,5 +1,7 @@
 # RPTConv<br>[![Patreon][patreon-img]][patreon-url] [![PayPal][paypal-img]][paypal-url] [![Discord][discord-img]][discord-url]
 
+> WARNING: The SUBTEL excel file is most of the time wrong about frequencies, tones and coordinates, please use at your own risk
+
 RPTConv is a simple Python script to convert the Amateur Radio Repeaters List provided by SUBTEL (Undersecretary of Telecommunications - Chile) into CHIRP compatible lists. It allows you to filter by region, sort by distance and export specific bands.
 
 ![](img.jpg)
